@@ -23,15 +23,15 @@ print(data)
 
 DBS = SQL.Interface(database='Expenses')
 insert_statement = """\
-            INSERT INTO landing.MonarchLoad (
-                TransactionDate
-                , Merchant
-                , Category
-                , Account
-                , OriginalStatement
-                , Notes
-                , Amount
-                , Tags
-                , FileTimeStamp)
-            VALUES (?,?,?,?,?,?,?,?,?);"""
+    INSERT INTO landing.MonarchLoad (
+        TransactionDate
+        , Merchant
+        , Category
+        , Account
+        , OriginalStatement
+        , Notes
+        , Amount
+        , Tags
+        , FileTimeStamp)
+    VALUES (?,?,?,?,?,?,?,?,?);"""
 DBS.InsertMany(insert_statement, data[1:])
