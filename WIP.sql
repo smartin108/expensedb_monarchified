@@ -1,5 +1,26 @@
 
 
+
+begin try
+	begin transaction
+		exec stage.LoadMonarchUpdateHash;
+		exec stage.LoadMonarchNew;
+		exec stage.LoadMonarchCaptureDups;
+		exec stage.LoadMonarchProd;
+	commit
+
+	begin transaction
+		truncate table landing.MonarchDuplicate;
+		truncate table stage.MonarchLoad;
+	commit
+end try
+begin catch
+	if @@TRANCOUNT > 0
+		rollback
+end catch
+
+
+
 select * From landing.MonarchLoad
 order by TransactionDate asc
 
@@ -36,3 +57,5 @@ inner join ReferenceData.Ref.Dates D
 group by D.LastDayOfMonth
 order by 1
 ;
+
+

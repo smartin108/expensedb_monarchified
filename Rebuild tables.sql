@@ -20,6 +20,9 @@ create table cfg.Monarch_SourceRowRetention (
 	, RowActive bit not null 
 	, RetainSourceOlderThanMonths int
 );
+insert into cfg.Monarch_SourceRowRetention (RowActive, RetainSourceOlderThanMonths)
+values (1, 20)
+;
 
 
 create table prod.ExpenseFact (
