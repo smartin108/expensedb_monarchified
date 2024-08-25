@@ -2,14 +2,15 @@ USE Expenses
 GO
 
 
-drop table if exists cfg.Monarch_SourceRowRetention
-drop table if exists prod.ExpenseFact_Locking
-drop table if exists prod.ExpenseFact
-drop table if exists [stage].[MonarchLoad]
-drop table if exists landing.MonarchDuplicate
-drop table if exists landing.[MonarchLoad]
+drop table if exists cfg.Monarch_SourceRowRetention;
+drop table if exists prod.ExpenseFact_Locking;
+drop table if exists prod.ExpenseFact;
+drop table if exists [stage].[MonarchLoad];
+drop table if exists landing.MonarchDuplicate;
+drop table if exists landing.[MonarchLoad];
 
 
+-- disable constraints
 EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
 GO
 
@@ -96,4 +97,6 @@ CREATE TABLE landing.[MonarchLoad](
 	[LoadCreateDate] [datetime2](7) NOT NULL default getdate()
 );
 
+
+-- reenable constraints
 exec sp_MSforeachtable @command1="print '?'", @command2="ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
