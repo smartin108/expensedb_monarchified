@@ -35,6 +35,7 @@ create table prod.ExpenseFact (
 	, Notes varchar(255)
 	, Amount decimal(9,2)
 	, Tags varchar(255)
+	, RecordSource varchar(255)
 	, DataHash varbinary(32)
 	, FileTimeStamp varchar(255)
 	, LoadCreateDate datetime2 not null default getdate()
