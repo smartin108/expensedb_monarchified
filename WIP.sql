@@ -44,22 +44,17 @@ order by 1
 
 
 
-/*
-begin try
-	begin transaction
-		exec stage.LoadMonarchUpdateHash;
-		exec stage.LoadMonarchNew;
-		exec stage.LoadMonarchCaptureDups;
-		exec stage.LoadMonarchProd;
-	commit
+exec stage.LoadMonarch
 
-	begin transaction
-		truncate table landing.MonarchDuplicate;
-		truncate table stage.MonarchLoad;
-	commit
-end try
-begin catch
-	if @@TRANCOUNT > 0
-		rollback
-end catch
+
+/*
+
+DEFECTS
+
+*	20204 08 25 sp stage.LoadMonarchProd is supposed to throw error 979797 and abort when loading a blank table for 
+		the first time, but it isn't doing either of those things. 
+
+
+
+
 */
