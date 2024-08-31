@@ -1,5 +1,27 @@
+﻿/*
+
+		DEFECTS
+
+		*	20204 08 25 sp stage.LoadMonarchProd is supposed to throw error 979797 and abort when loading a blank table for 
+				the first time, but it isn't doing either of those things. 
 
 
+
+
+*/
+
+
+/*	
+	
+		Piece-wise execution of sp stage.LoadMonarch	─────┐
+															 │
+															 ▼
+*/
+
+
+-- 	[ First... ]
+-- 	[ Run this script and import something : ]
+-- 	[ "C:\Users\Z40\Documents\git\expenses\monarch_data_load.py" ]
 select * From landing.MonarchLoad
 order by TransactionDate asc
 
@@ -47,14 +69,3 @@ order by 1
 exec stage.LoadMonarch
 
 
-/*
-
-DEFECTS
-
-*	20204 08 25 sp stage.LoadMonarchProd is supposed to throw error 979797 and abort when loading a blank table for 
-		the first time, but it isn't doing either of those things. 
-
-
-
-
-*/
