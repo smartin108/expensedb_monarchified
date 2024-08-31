@@ -26,7 +26,7 @@ as begin
 ; with UniqueSource as (
 	select 
 		ID
-		, ROW_NUMBER() over (partition by DataHash order by LoadCreateDate desc) as RN
+		, ROW_NUMBER() over (partition by DataHash order by CreatedTimestamp desc) as RN
 	from landing.MonarchLoad
 )
 insert into stage.MonarchLoad (
@@ -39,7 +39,7 @@ insert into stage.MonarchLoad (
 	, Amount
 	, Tags
 	, FileTimeStamp
-	, LoadCreateDate
+	, CreatedTimestamp
 )
 select 
 	cast(A.TransactionDate as date)
@@ -51,7 +51,7 @@ select
 	, cast(A.Amount as decimal(9,2))
 	, nullif(trim(A.Tags), '')
 	, cast(A.FileTimeStamp as datetime2)
-	, A.LoadCreateDate
+	, A.CreatedTimestamp
 from landing.MonarchLoad as A
 inner join UniqueSource as B
 	on A.ID = B.ID

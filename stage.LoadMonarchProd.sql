@@ -74,7 +74,7 @@ BEGIN
 	; with UniqueSource as (
 		select 
 			A.ID
-			, ROW_NUMBER() over (partition by A.DataHash order by A.LoadCreateDate desc) as RN
+			, ROW_NUMBER() over (partition by A.DataHash order by A.CreatedTimestamp desc) as RN
 		from stage.MonarchLoad as A
 	),
 	ProdLoad as (
@@ -100,7 +100,7 @@ BEGIN
 		, RecordSource
 		, DataHash
 		, FileTimeStamp
-		, LoadCreateDate
+		, CreatedTimestamp
 	)
 	values ( 
 		L.TransactionDate
@@ -114,7 +114,7 @@ BEGIN
 		, 'Monarch'
 		, L.DataHash
 		, L.FileTimeStamp
-		, L.LoadCreateDate
+		, L.CreatedTimestamp
 	);
 
 

@@ -54,6 +54,18 @@ select * From prod.ExpenseFact
 order by TransactionDate asc
 
 
+
+truncate table landing.MonarchLoad;
+truncate table stage.MonarchLoad;
+
+
+/*	
+															 ▲
+															 │
+		Piece-wise execution of sp stage.LoadMonarch	─────┘
+
+*/
+
 select
 	D.LastDayOfMonth
 	, count(1)

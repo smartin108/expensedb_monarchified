@@ -38,7 +38,7 @@ create table prod.ExpenseFact (
 	, RecordSource varchar(255)
 	, DataHash varbinary(32)
 	, FileTimeStamp varchar(255)
-	, LoadCreateDate datetime2 not null default getdate()
+	, CreatedTimestamp datetime2 not null default getdate()
 	, LoadUpdateDate datetime2 not null default getdate()
 	, RowLocked bit not null default 0
 );
@@ -47,7 +47,7 @@ create table prod.ExpenseFact (
 create table prod.ExpenseFact_Locking (
 	ID int identity not null primary key
 	, ExpenseFact_ID int not null
-	, LoadCreateDate datetime2 not null
+	, CreatedTimestamp datetime2 not null
 	, LoadUpdateDate datetime2 not null
 
 	, foreign key (ExpenseFact_ID) references prod.ExpenseFact(ID)
@@ -66,7 +66,7 @@ CREATE TABLE [stage].[MonarchLoad](
 	[Tags] [varchar](255) NULL,
 	[DataHash] [varbinary](32) NULL,
 	[FileTimeStamp] [varchar](255) NULL,
-	[LoadCreateDate] [datetime2](7) NOT NULL,
+	[CreatedTimestamp] [datetime2](7) NOT NULL,
 );
 
 
@@ -82,7 +82,7 @@ create table landing.MonarchDuplicate (
 	, Tags varchar(255)
 	, DataHash varbinary(32)
 	, FileTimeStamp varchar(255)
-	, LoadCreateDate datetime2 not null default getdate()
+	, CreatedTimestamp datetime2 not null default getdate()
 );
 
 
@@ -98,7 +98,7 @@ CREATE TABLE landing.[MonarchLoad](
 	[Tags] [varchar](255) NULL,
 	[DataHash] [varbinary](32) NULL,
 	[FileTimeStamp] [varchar](255) NULL,
-	[LoadCreateDate] [datetime2](7) NOT NULL default getdate()
+	[CreatedTimestamp] [datetime2](7) NOT NULL default getdate()
 );
 
 

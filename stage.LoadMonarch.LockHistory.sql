@@ -29,7 +29,7 @@ on T.ExpenseFact_ID = L.ID
 when not matched by target
 then insert (
 	ExpenseFact_ID
-	, LoadCreateDate
+	, CreatedTimestamp
 	, LoadUpdateDate
 	)
 values (

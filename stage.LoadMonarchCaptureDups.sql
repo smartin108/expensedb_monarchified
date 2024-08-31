@@ -19,7 +19,7 @@ truncate table landing.MonarchDuplicate;
 ; with UniqueSource as (
 	select 
 		ID
-		, ROW_NUMBER() over (partition by DataHash order by LoadCreateDate desc) as RN
+		, ROW_NUMBER() over (partition by DataHash order by CreatedTimestamp desc) as RN
 	from landing.MonarchLoad
 )
 insert into landing.MonarchDuplicate (
@@ -33,7 +33,7 @@ insert into landing.MonarchDuplicate (
 	, Tags
 	, DataHash
 	, FileTimeStamp
-	, LoadCreateDate
+	, CreatedTimestamp
 )
 select 
 	A.TransactionDate 
@@ -46,7 +46,7 @@ select
 	, A.Tags
 	, A.DataHash
 	, A.FileTimeStamp 
-	, A.LoadCreateDate
+	, A.CreatedTimestamp
 from landing.MonarchLoad A
 left join UniqueSource B
 	on A.ID = B.ID
