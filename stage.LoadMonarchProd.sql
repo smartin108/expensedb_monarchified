@@ -39,13 +39,13 @@ drop table if exists #integrity_check;
 
 
 select 
-	A.RowLocked
+	isnull(A.RowLocked, 0) as RowLocked
 	, count(1) as StageRowCount
 into #integrity_check
-from prod.ExpenseFact A
-inner join stage.MonarchLoad B
+from stage.MonarchLoad B
+left join prod.ExpenseFact A
 	on A.DataHash = B.DataHash
-group by A.RowLocked
+group by isnull(A.RowLocked, 0)
 ;
 
 

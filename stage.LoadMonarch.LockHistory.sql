@@ -16,43 +16,47 @@ begin
 declare @LoadTimeStamp datetime2 = getdate();
 declare @MonthsHistory int = (select RetainSourceOlderThanMonths from cfg.Monarch_SourceRowRetention where RowActive = 1);
 declare @LockDate datetime2 = DATEADD("MONTH", -1 * @MonthsHistory, eomonth(@LoadTimeStamp, 0));
+print @LockDate
 
 
-; with LockRow as (
-	select ID
-	from prod.ExpenseFact A
-	where A.TransactionDate <= @LockDate
-)
-merge into prod.ExpenseFact_Locking T
-using LockRow L
-on T.ExpenseFact_ID = L.ID
-when not matched by target
-then insert (
-	ExpenseFact_ID
-	, CreatedTimestamp
-	, LoadUpdateDate
+begin transaction
+	; with LockRow as (
+		select ID
+		from prod.ExpenseFact A
+		where A.TransactionDate <= @LockDate
 	)
-values (
-	L.ID
-	, @LoadTimeStamp
-	, @LoadTimeStamp
+	merge into prod.ExpenseFact_Locking T
+	using LockRow L
+	on T.ExpenseFact_ID = L.ID
+	when not matched by target
+	then insert (
+		ExpenseFact_ID
+		, CreatedTimestamp
+		, LoadUpdateDate
+		)
+	values (
+		L.ID
+		, @LoadTimeStamp
+		, @LoadTimeStamp
+		)
+	;
+
+
+	; with LockRow as (
+		select ID
+		from prod.ExpenseFact A
+		where A.TransactionDate <= @LockDate
+			and A.RowLocked = 0
 	)
-;
+	update A
+	set A.RowLocked = 1
+	from prod.ExpenseFact as A
+	inner join LockRow B
+		on A.ID = B.ID
+	;
 
 
-; with LockRow as (
-	select ID
-	from prod.ExpenseFact A
-	where A.TransactionDate <= @LockDate
-		and A.RowLocked = 0
-)
-update A
-set A.RowLocked = 1
-from prod.ExpenseFact as A
-inner join LockRow B
-	on A.ID = B.ID
-;
-
+commit
 
 end
 GO
