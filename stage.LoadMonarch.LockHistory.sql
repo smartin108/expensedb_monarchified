@@ -15,7 +15,7 @@ begin
 
 declare @LoadTimeStamp datetime2 = getdate();
 declare @MonthsHistory int = (select RetainSourceOlderThanMonths from cfg.Monarch_SourceRowRetention where RowActive = 1);
-declare @LockDate datetime2 = DATEADD("MONTH", -1 * @MonthsHistory, eomonth(@LoadTimeStamp, 0));
+declare @LockDate datetime2 = eomonth(@LoadTimeStamp, -1 * @MonthsHistory);
 print @LockDate
 
 
@@ -56,7 +56,9 @@ begin transaction
 	;
 
 
-commit
+
+rollback
+--commit
 
 end
 GO

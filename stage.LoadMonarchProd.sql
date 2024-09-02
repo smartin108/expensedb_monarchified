@@ -15,7 +15,7 @@ GO
 
 
 CREATE   procedure [stage].[LoadMonarchProd]
-as begin
+as BEGIN
 
 /*
 
@@ -43,27 +43,30 @@ select
 	, count(1) as StageRowCount
 into #integrity_check
 from stage.MonarchLoad B
-left join prod.ExpenseFact A
+inner join prod.ExpenseFact A
 	on A.DataHash = B.DataHash
 group by isnull(A.RowLocked, 0)
 ;
 
 
-declare @UnlockedRowCount int = (select StageRowCount from #integrity_check where RowLocked = 0);
-declare @LockedRowCount int = (select isnull(StageRowCount,0) from #integrity_check where RowLocked = 1);
-select * from #integrity_check
-print @UnlockedRowCount 
-print @LockedRowCount 
+declare @UnlockedRowCount int = isnull((select StageRowCount from #integrity_check where RowLocked = 0),0);
+declare @LockedRowCount int = isnull((select StageRowCount from #integrity_check where RowLocked = 1),0);
+declare @ProdIsInitialized int = isnull((select count(1) from prod.ExpenseFact),0);
 
-if @UnlockedRowCount < 100 or @LockedRowCount < 100
-begin
+select * from #integrity_check
+print '@UnlockedRowCount  ' + cast(@UnlockedRowCount as varchar(50))
+print '@LockedRowCount    ' + cast(@LockedRowCount as varchar(50))
+print '@ProdIsInitialized ' + cast(@ProdIsInitialized as varchar(50))
+
+if (@UnlockedRowCount < 100 or @LockedRowCount < 100) and (@ProdIsInitialized > 0)
+BEGIN
 	begin try
 		throw 979797, 'staged data does not appear to be congruent with production',0;
 	end try
 	begin catch
 		throw
 	end catch
-end
+END
 ELSE
 BEGIN
 
@@ -121,6 +124,6 @@ BEGIN
 END
 
 
-end
+END
 GO
 

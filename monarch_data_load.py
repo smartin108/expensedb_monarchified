@@ -7,7 +7,7 @@ from datetime import datetime
 import clsSQLServer as SQL
 
 Tk().withdraw()
-filename = askopenfilename()
+filename = askopenfilename(initialdir=r"C:\Users\Z40\Documents\git\expenses", title="Select Monarch Transaction File")
 file_c_time = time.ctime(os.path.getctime(filename))
 timestamp = datetime.strptime(file_c_time, "%a %b %d %H:%M:%S %Y")
 print(timestamp.isoformat())

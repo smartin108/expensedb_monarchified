@@ -18,10 +18,10 @@ GO
 create table cfg.Monarch_SourceRowRetention (
 	ID int identity not null primary key
 	, RowActive bit not null 
-	, RetainSourceOlderThanMonths int
+	, MinimumAge int
 );
-insert into cfg.Monarch_SourceRowRetention (RowActive, RetainSourceOlderThanMonths)
-values (1, 20)
+insert into cfg.Monarch_SourceRowRetention (RowActive, MinimumAge)
+values (1, 18)
 ;
 
 
