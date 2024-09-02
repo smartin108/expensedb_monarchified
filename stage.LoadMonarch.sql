@@ -13,11 +13,16 @@ BEGIN TRY
 		exec stage.LoadMonarchProd;
 		truncate table landing.MonarchLoad;
 		truncate table stage.MonarchLoad;
-	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
-	ROLLBACK TRANSACTION
+	IF @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION;
+	THROW;
 END CATCH
+
+
+IF @@TRANCOUNT > 0 
+	COMMIT TRANSACTION;
 
 END
 GO

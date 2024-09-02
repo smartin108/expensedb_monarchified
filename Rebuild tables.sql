@@ -5,9 +5,11 @@ GO
 drop table if exists cfg.Monarch_SourceRowRetention;
 drop table if exists prod.ExpenseFact_Locking;
 drop table if exists prod.ExpenseFact;
-drop table if exists [stage].[MonarchLoad];
+drop table if exists stage.MonarchLoad;
 drop table if exists landing.MonarchDuplicate;
-drop table if exists landing.[MonarchLoad];
+drop table if exists landing.MonarchLoad;
+drop table if exists xref.MessageSeverity;
+drop table if exists prod.MonarchLoadMessages;
 
 
 -- disable constraints
@@ -100,6 +102,37 @@ CREATE TABLE landing.[MonarchLoad](
 	[DataHash] [varbinary](32) NULL,
 	[FileTimeStamp] [varchar](255) NULL,
 	[CreatedTimestamp] [datetime2](7) NOT NULL default getdate()
+);
+
+
+create table xref.MessageSeverity(
+	ID int identity not null primary key
+	, MessageSeverityID int not null
+	, MessageSeverityText varchar(32) not null
+);
+
+
+create unique index ix_MessageSeverityID 
+on xref.MessageSeverity (MessageSeverityID)
+;
+
+
+insert into xref.MessageSeverity(MessageSeverityID, MessageSeverityText)
+values
+		(0,		'DEBUG')
+	,	(1,		'MESSAGE')
+	,	(2,		'INFORMATION')
+	,	(3,		'WARNING')
+	,	(104,	'CRITICAL')
+;
+
+
+create table prod.MonarchLoadMessages (
+	ID int identity NOT NULL primary key
+	, MessageSeverity int NOT NULL foreign key (MessageSeverity) references xref.MessageSeverity(MessageSeverityID)
+	, MessageTimestamp datetime2 NOT NULL
+	, BatchID int NULL
+	, LoadMessage varchar(512) NULL
 );
 
 

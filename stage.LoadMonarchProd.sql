@@ -1,36 +1,10 @@
 USE [Expenses]
 GO
 
-/****** Object:  StoredProcedure [stage].[LoadMonarchProd]    Script Date: 8/31/2024 7:25:37 PM ******/
-DROP PROCEDURE [stage].[LoadMonarchProd]
-GO
-
-/****** Object:  StoredProcedure [stage].[LoadMonarchProd]    Script Date: 8/31/2024 7:25:37 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE   procedure [stage].[LoadMonarchProd]
+CREATE OR ALTER  procedure [stage].[LoadMonarchProd]
 as BEGIN
 
 /*
-
-idea: 
-
-	*	delete records that are not locked (!)
-	*	merge staged data into prod
-
-
-conditions
-	*	stage should have at least one (and really, many more than 1) row that matches a locked record in prod 
-		If this isn't the case, then stage should be considered incomplete
-
-	*	stage should have at least one row that matches an unlocked record in prod as well
-		If this isn't the case then we should question the integrity of stage and prod
 
 */
 

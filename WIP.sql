@@ -27,7 +27,7 @@ order by TransactionDate asc
 
 
 exec stage.LoadMonarchUpdateHash;
-select * From stage.MonarchLoad
+select * From landing.MonarchLoad
 order by TransactionDate asc
 
 
@@ -47,7 +47,7 @@ select * from prod.ExpenseFact_Locking;
 
 
 exec stage.LoadMonarchProd;
-select * from stage.MonarchLoad;
+select * from stage.MonarchLoad; --???
 
 
 select * From prod.ExpenseFact 
