@@ -54,8 +54,17 @@ set @FeasibleAge = (select FeasibleAge from #RetentionHelper)
 
 IF @FeasibleAge < @IndicatedAge 
 BEGIN
+
+
+	/* Stored retention parameters are potentially insufficient; abort */
+
+
+	declare @Message1 varchar(512) = 'STAGED DATA IS INSUFFICIENT TO PRESERVE HISTORY WITH CURRENT CONFIGURATION';
+	declare @Message2 varchar(512) = REPLACE(REPLACE(@Message1 + '; IndicatedAge = %; FeasibleAge = ^;', '%', @IndicatedAge), '^', @FeasibleAge);
+	exec prod.MessageCapture null, 104, @Message2;
+
 	BEGIN TRY
-		THROW 979797, 'STAGED DATA IS INSUFFICIENT TO PRESERVE HISTORY WITH CURRENT CONFIGURATION', 20;
+		THROW 979797, @Message1, 20;
 	END TRY
 	BEGIN CATCH
 		THROW
@@ -66,6 +75,11 @@ BEGIN
 	BEGIN TRANSACTION
 
 
+		/*	It's safe to proceed with stored retention parameters 
+			Go ahead and lock older rows in prod before proceeding to the load step
+		*/
+
+
 		set @LockDate = eomonth(@LoadTimeStamp, -1 * @IndicatedAge);
 
 
@@ -74,20 +88,26 @@ BEGIN
 			from prod.ExpenseFact A
 			where A.TransactionDate <= @LockDate
 		)
+
 		merge into prod.ExpenseFact_Locking T
 		using LockRow L
 		on T.ExpenseFact_ID = L.ID
+
 		when not matched by target
 		then insert (
 			ExpenseFact_ID
 			, CreatedTimestamp
-			, LoadUpdateDate
+			, UpdatedTimestamp
 			)
 		values (
 			L.ID
 			, @LoadTimeStamp
 			, @LoadTimeStamp
 			)
+
+		when matched 
+		then update
+			set UpdatedTimestamp = @LoadTimeStamp
 		;
 
 
@@ -105,9 +125,8 @@ BEGIN
 		;
 
 
-
-	ROLLBACK
-	--COMMIT
+	--ROLLBACK
+	COMMIT
 
 END
 

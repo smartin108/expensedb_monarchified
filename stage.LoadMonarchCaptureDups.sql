@@ -34,6 +34,7 @@ insert into landing.MonarchDuplicate (
 	, DataHash
 	, FileTimeStamp
 	, CreatedTimestamp
+	, UpdatedTimestamp
 )
 select 
 	A.TransactionDate 
@@ -47,10 +48,21 @@ select
 	, A.DataHash
 	, A.FileTimeStamp 
 	, A.CreatedTimestamp
+	, A.UpdatedTimestamp
 from landing.MonarchLoad A
 left join UniqueSource B
 	on A.ID = B.ID
 where RN > 1
+
+
+declare @PotentialDups int = @@ROWCOUNT;
+
+
+if @PotentialDups > 0
+BEGIN
+	declare @Message varchar(512) = REPLACE('% potential duplicate transactions were found', '%', cast(@PotentialDups as varchar(16)))
+	exec prod.MessageCapture null, 3, @Message
+END
 
 
 end

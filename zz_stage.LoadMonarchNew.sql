@@ -1,19 +1,11 @@
 USE [Expenses]
 GO
 
-/****** Object:  StoredProcedure [stage].[LoadMonarchNew]    Script Date: 8/31/2024 7:25:19 PM ******/
-DROP PROCEDURE [stage].[LoadMonarchNew]
-GO
-
-/****** Object:  StoredProcedure [stage].[LoadMonarchNew]    Script Date: 8/31/2024 7:25:19 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE   procedure [stage].[LoadMonarchNew]
+CREATE or alter   procedure [stage].[LoadMonarchNew]
 as begin
+
+
+declare @LoadTime datetime2 = getdate();
 
 
 -- Monarch transactions : landing -> stage
@@ -33,7 +25,10 @@ insert into stage.MonarchLoad (
 	, Amount
 	, Tags
 	, FileTimeStamp
+
+	, BatchID
 	, CreatedTimestamp
+	, UpdatedTimestamp
 )
 select 
 	cast(A.TransactionDate as date)
@@ -45,7 +40,10 @@ select
 	, cast(A.Amount as decimal(9,2))
 	, nullif(trim(A.Tags), '')
 	, cast(A.FileTimeStamp as datetime2)
-	, A.CreatedTimestamp
+
+	, BatchID
+	, @LoadTime
+	, @LoadTime
 from landing.MonarchLoad as A
 inner join UniqueSource as B
 	on A.ID = B.ID
@@ -54,17 +52,22 @@ inner join UniqueSource as B
 
 
 update stage.MonarchLoad
-set DataHash = HASHBYTES('SHA2_256', CONCAT_WS('~', 
-		TransactionDate
-		, Merchant 
-		, Category 
-		, Account 
-		, OriginalStatement
-		, Notes 
-		, Amount
-		, Tags
-		)
-	)
+set DataHash = 
+		HASHBYTES(
+			'SHA2_256'
+			, CONCAT_WS(
+				'~'
+				, TransactionDate
+				, Merchant 
+				, Category 
+				, Account 
+				, OriginalStatement
+				, Notes 
+				, Amount
+				, Tags
+			)
+		),
+	UpdatedTimestamp = @LoadTime
 ;
 
 

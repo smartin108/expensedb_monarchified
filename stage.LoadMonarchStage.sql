@@ -1,19 +1,11 @@
 USE [Expenses]
 GO
 
-/****** Object:  StoredProcedure [stage].[LoadMonarchStage]    Script Date: 8/31/2024 7:25:52 PM ******/
-DROP PROCEDURE [stage].[LoadMonarchStage]
-GO
-
-/****** Object:  StoredProcedure [stage].[LoadMonarchStage]    Script Date: 8/31/2024 7:25:52 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-create     procedure [stage].[LoadMonarchStage]
+create or alter    procedure [stage].[LoadMonarchStage]
 as begin
+
+
+declare @LoadTime datetime2 = getdate();
 
 /*
 
@@ -39,7 +31,10 @@ insert into stage.MonarchLoad (
 	, Amount
 	, Tags
 	, FileTimeStamp
+
+	, BatchID
 	, CreatedTimestamp
+	, UpdatedTimestamp
 )
 select 
 	cast(A.TransactionDate as date)
@@ -51,7 +46,10 @@ select
 	, cast(A.Amount as decimal(9,2))
 	, nullif(trim(A.Tags), '')
 	, cast(A.FileTimeStamp as datetime2)
-	, A.CreatedTimestamp
+
+	, BatchID
+	, @LoadTime
+	, @LoadTime
 from landing.MonarchLoad as A
 inner join UniqueSource as B
 	on A.ID = B.ID
@@ -59,20 +57,30 @@ inner join UniqueSource as B
 ;
 
 
-update MonarchLoad_A
-set DataHash = HASHBYTES('SHA2_256', CONCAT_WS('~', 
-		TransactionDate
-		, Merchant 
-		, Category 
-		, Account 
-		, OriginalStatement
-		, Notes 
-		, Amount
-		, Tags
+declare @RowCount int = @@ROWCOUNT;
+declare @Message varchar(512) = REPLACE('% rows were inserted to stage.MonarchLoad', '%', cast(@RowCount as varchar(512)));
+exec prod.MessageCapture null, 2, @Message
+
+
+update A
+set DataHash = 
+		HASHBYTES(
+			'SHA2_256'
+			, CONCAT_WS(
+				'~'
+				, TransactionDate
+				, Merchant 
+				, Category 
+				, Account 
+				, OriginalStatement
+				, Notes 
+				, Amount
+				, Tags
+			)
 		)
-	)
-from stage.MonarchLoad as MonarchLoad_A
-where MonarchLoad_A.DataHash is null
+	, UpdatedTimestamp = @LoadTime
+from stage.MonarchLoad as A
+where A.DataHash is null
 ;
 
 

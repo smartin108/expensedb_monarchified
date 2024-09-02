@@ -11,18 +11,27 @@ GO
 CREATE OR ALTER   procedure [stage].[LoadMonarchUpdateHash]
 as begin
 
+
+declare @LoadTime datetime2 = getdate();
+
+
 update landing.MonarchLoad
-set DataHash = HASHBYTES('SHA2_256', CONCAT_WS('~', 
-		TransactionDate
-		, Merchant 
-		, Category 
-		, Account 
-		, OriginalStatement
-		, Notes 
-		, Amount
-		, Tags
-		)
-	)
+set DataHash = 
+		HASHBYTES(
+			'SHA2_256'
+			, CONCAT_WS(
+				'~'
+				, TransactionDate
+				, Merchant 
+				, Category 
+				, Account 
+				, OriginalStatement
+				, Notes 
+				, Amount
+				, Tags
+			)
+		),
+	UpdatedTimestamp = @LoadTime
 ;
 
 
