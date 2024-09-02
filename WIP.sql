@@ -27,7 +27,7 @@ order by TransactionDate asc
 
 
 exec stage.LoadMonarchUpdateHash;
-select * From landing.MonarchLoad
+select * From stage.MonarchLoad
 order by TransactionDate asc
 
 
