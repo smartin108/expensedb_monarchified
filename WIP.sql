@@ -31,7 +31,7 @@ select * From landing.MonarchLoad
 order by TransactionDate asc
 
 
-exec stage.LoadMonarchNew;
+exec stage.LoadMonarchStage;
 select * From stage.MonarchLoad
 order by TransactionDate asc
 
@@ -39,6 +39,9 @@ order by TransactionDate asc
 exec stage.LoadMonarchCaptureDups;
 select * From landing.MonarchDuplicate 
 order by TransactionDate asc
+
+
+select * from cfg.Monarch_SourceRowRetention;
 
 
 exec stage.LoadMonarchLockHistory;

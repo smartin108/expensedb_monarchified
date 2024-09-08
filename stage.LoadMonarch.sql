@@ -16,8 +16,21 @@ BEGIN TRY
 		truncate table stage.MonarchLoad;
 END TRY
 BEGIN CATCH
+    DECLARE @ErrorNumber INT = ERROR_NUMBER();
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+    DECLARE @ErrorState INT = ERROR_STATE();
+
 	IF @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION;
+
+	exec prod.MessageCapture 
+				  @MessageSeverity		= 105
+				, @ObjectRef			= 'stage.LoadMonarch'
+				, @ErrorNumber			= @ErrorNumber
+				, @ErrorMessage			= @ErrorMessage
+				, @ErrorSeverity		= @ErrorSeverity
+				, @ErrorState			= @ErrorState;
 	THROW;
 END CATCH
 

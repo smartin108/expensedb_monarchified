@@ -65,8 +65,12 @@ values (
 
 declare @RowCount int = @@ROWCOUNT;
 declare @Message varchar(512) = REPLACE('% rows were inserted to prod.ExpenseFact', '%', cast(@RowCount as varchar(512)));
-exec prod.MessageCapture null, 2, @Message
+exec prod.MessageCapture 
+	  @MessageSeverity		= 2
+	, @ObjectRef			= 'stage.LoadMonarchProd'
+	, @AdditionalMessage	= @Message;
 
+		
 END
 GO
 

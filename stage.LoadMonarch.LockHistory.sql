@@ -33,11 +33,13 @@ declare @FeasibleAge int;
 	from stage.MonarchLoad
 	group by eomonth(TransactionDate,0)
 )
+--select * from CountsAges order by 1 asc
 , MaxAgeOfData as (
 	select max(Age) as MaxAge
 	from CountsAges
 	where CumulRowCount >= @MinimumRetentionRows
 )
+--select * from MaxAgeOfData
 select 
 	max(Age) as IndicatedAge
 	, min(Age) as FeasibleAge
@@ -49,10 +51,29 @@ from (
 	) as x (Age)
 ;
 
+--select * from #RetentionHelper
+
+
+/*
+
+LOL got a bit bogged down in my own logic here
+
+Requirements:
+
+	*	in the cfg table, we specify a /required/ minimum number of months of data we expect to see in the staging data (e.g., 18)
+		*	This is a hard requirement; if staging does not contain this, we should fail the job and roll back
+	*	in the cfg we also specify some number of transactions we expect to be /at least/ as old as the minimum age (e.g., 500)
+		*	This is a flexible requirement, and can be adjusted downward in order to meet the minimum age requirement
+		*	IFF the transaction-based parameter yields an Age sufficiently old, we use it
+			*	Otherwise, we should fail the load
+
+
+*/
+
 set @IndicatedAge = (select IndicatedAge from #RetentionHelper) 
 set @FeasibleAge = (select FeasibleAge from #RetentionHelper)
 
-IF @FeasibleAge < @IndicatedAge 
+IF @FeasibleAge < @MinimumRetentionAge 
 BEGIN
 
 
@@ -61,10 +82,9 @@ BEGIN
 
 	declare @Message1 varchar(512) = 'STAGED DATA IS INSUFFICIENT TO PRESERVE HISTORY WITH CURRENT CONFIGURATION';
 	declare @Message2 varchar(512) = REPLACE(REPLACE(@Message1 + '; IndicatedAge = %; FeasibleAge = ^;', '%', @IndicatedAge), '^', @FeasibleAge);
-	exec prod.MessageCapture null, 104, @Message2;
 
 	BEGIN TRY
-		THROW 979797, @Message1, 20;
+		THROW 979797, @Message2, 20;
 	END TRY
 	BEGIN CATCH
 		THROW

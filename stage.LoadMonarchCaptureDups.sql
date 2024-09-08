@@ -61,7 +61,10 @@ declare @PotentialDups int = @@ROWCOUNT;
 if @PotentialDups > 0
 BEGIN
 	declare @Message varchar(512) = REPLACE('% potential duplicate transactions were found', '%', cast(@PotentialDups as varchar(16)))
-	exec prod.MessageCapture null, 3, @Message
+	exec prod.MessageCapture 
+		  @MessageSeverity		= 2
+		, @ObjectRef			= 'stage.LoadMonarchCaptureDups'
+		, @AdditionalMessage	= @Message;
 END
 
 
